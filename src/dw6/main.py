@@ -5,7 +5,7 @@ import re
 import subprocess
 from pathlib import Path
 from datetime import datetime, timezone
-from dw6.state_manager import WorkflowManager, STAGES
+from dw6.state_manager import WorkflowManager, STAGES, DELIVERABLE_PATHS
 from dw6.augmenter import PromptAugmenter
 from dw6.templates import process_prompt
 
@@ -62,6 +62,167 @@ def register_technical_debt(description, issue_type="test", commit_to_fix=None):
     
     print(f"Successfully logged technical debt {new_id}.")
     return new_id
+
+def setup_project():
+    """Initializes a new project directory with the required structure and state."""
+    print("--- Initializing New DW6 Project ---")
+
+    # Check for existing setup
+    if Path(".git").exists() or Path("logs/workflow_state.txt").exists():
+        print("ERROR: Project appears to be already initialized. Aborting setup.", file=sys.stderr)
+        sys.exit(1)
+
+    # Create directory structure
+    print("Creating directory structure...")
+    Path("docs").mkdir(exist_ok=True)
+    for path in DELIVERABLE_PATHS.values():
+        Path(path).mkdir(parents=True, exist_ok=True)
+
+    # Initialize workflow state
+    print("Initializing workflow state...")
+    manager = WorkflowManager()
+    manager.state.initialize_state()
+
+    # Create .gitignore
+    print("Creating .gitignore...")
+    gitignore_content = """# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# PEP 582; used by PDM, PEP 582 proposal
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+"""
+    with open(".gitignore", "w") as f:
+        f.write(gitignore_content)
+
+    # Initialize Git repository
+    print("Initializing Git repository...")
+    subprocess.run(["git", "init"], check=True)
+    subprocess.run(["git", "add", "."], check=True)
+    subprocess.run(["git", "commit", "-m", "Initial commit"], check=True)
+
+    print("\n--- Project Setup Complete ---")
+    print("Ready to start Cycle 1. Use 'dw6 new \"<your_prompt>\"' to begin.")
 
 def revert_to_previous_stage(manager, target_stage_name=None):
     """Reverts the workflow to the previous stage or a specified target stage."""
@@ -123,6 +284,9 @@ def main():
     revert_parser = subparsers.add_parser("revert", help="Revert to a previous workflow stage.")
     revert_parser.add_argument("--to", dest="target_stage", help="Target stage to revert to. Defaults to previous stage.")
 
+    # Setup command
+    setup_parser = subparsers.add_parser("setup", help="Initialize a new DW6 project.")
+
     # Do command
     do_parser = subparsers.add_parser("do", help="Execute a governed action.")
     do_parser.add_argument("action", type=str, help="The action to execute.")
@@ -143,6 +307,8 @@ def main():
         register_technical_debt(args.description, args.type, args.commit)
     elif args.command == "revert":
         revert_to_previous_stage(manager, args.target_stage)
+    elif args.command == "setup":
+        setup_project()
     elif args.command == "do":
         try:
             manager.governor.authorize(args.action)
