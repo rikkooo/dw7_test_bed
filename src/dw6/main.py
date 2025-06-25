@@ -64,22 +64,12 @@ def register_technical_debt(description, issue_type="test", commit_to_fix=None):
     return new_id
 
 def setup_project():
-    import os
-    cwd = Path(os.getcwd())
-    print(f"DEBUG: Current working directory is {cwd}")
-    print(f"DEBUG: Contents of CWD: {os.listdir(cwd)}")
-
-    git_exists = (cwd / ".git").exists()
-    state_exists = (cwd / "logs/workflow_state.txt").exists()
-
-    print(f"DEBUG: Check for .git: {git_exists}")
-    print(f"DEBUG: Check for state file: {state_exists}")
-
     """Initializes a new project directory with the required structure and state."""
     print("--- Initializing New DW6 Project ---")
 
     # Check for existing setup
-    if git_exists or state_exists:
+    cwd = Path.cwd()
+    if (cwd / ".git").exists() or (cwd / "logs/workflow_state.txt").exists():
         print("ERROR: Project appears to be already initialized. Aborting setup.", file=sys.stderr)
         sys.exit(1)
 
