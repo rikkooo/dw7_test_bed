@@ -299,6 +299,9 @@ def main():
     # Setup command
     setup_parser = subparsers.add_parser("setup", help="Initialize a new DW6 project.")
 
+    # Serve command
+    serve_parser = subparsers.add_parser("serve", help="Run the DW6 context server.")
+
     # Do command
     do_parser = subparsers.add_parser("do", help="Execute a governed action.")
     do_parser.add_argument("action", type=str, help="The action to execute.")
@@ -321,6 +324,19 @@ def main():
         revert_to_previous_stage(manager, args.target_stage)
     elif args.command == "setup":
         setup_project()
+    elif args.command == "serve":
+        print("--- Starting DW6 Context Server ---")
+        print("URL: http://127.0.0.1:8000")
+        print("Press Ctrl+C to stop.")
+        try:
+            # We use a direct path to the script to avoid module resolution issues.
+            server_script_path = Path(__file__).parent / "context_server.py"
+            subprocess.run(["uvicorn", f"{server_script_path.stem}:app", "--host", "127.0.0.1", "--port", "8000"], check=True, cwd=Path(__file__).parent)
+        except KeyboardInterrupt:
+            print("\n--- Server Shutting Down ---")
+        except subprocess.CalledProcessError as e:
+            print(f"ERROR: Failed to start server: {e}", file=sys.stderr)
+            sys.exit(1)
     elif args.command == "do":
         try:
             manager.governor.authorize(args.action)
