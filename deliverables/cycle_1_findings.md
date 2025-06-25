@@ -38,3 +38,9 @@ This document tracks all flaws, bugs, and improvement points discovered during t
 * **Finding:** The `dw6 new` command's Prompt Augmentation System failed to populate the `System Context` section of the technical specification, leaving all fields as `Unknown`.
 * **Impact:** A key feature of the workflow is non-functional. The AI does not receive the necessary context (current state, git status, etc.) to generate accurate and context-aware technical specifications.
 * **Suggestion:** Debug the `dw6 new` command and the underlying `PromptAugmenter` to ensure it correctly gathers and injects the system context into the prompt.
+
+## 7. Missing `status` command
+
+* **Finding:** The `start-project-dw7.md` workflow refers to a `dw6 status` command that doesn't exist.
+* **Impact:** There is no way to check the current state of the project as described in the workflow, causing confusion and breaking the documented process.
+* **Suggestion:** Implement the `dw6 status` command or remove it from the workflow documentation and provide an alternative method for checking the state.
