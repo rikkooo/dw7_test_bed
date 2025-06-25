@@ -133,8 +133,10 @@ class Governor:
         print(f"[INFO] Advanced to next requirement: {next_req_id}.")
 
 class WorkflowManager:
-    def __init__(self):
-        self.state = WorkflowState()
+    """Orchestrates the entire DW6 workflow."""
+
+    def __init__(self, project_root=None):
+        self.state = WorkflowState(project_root=project_root)
         self.governor = Governor(self.state) # The manager now has a governor
         self.current_stage = self.state.get("CurrentStage")
 
@@ -306,8 +308,13 @@ class WorkflowManager:
 
 
 class WorkflowState:
-    def __init__(self):
-        self.state_file = Path("logs/workflow_state.txt")
+    """Manages the state of the workflow persisted in a file."""
+
+    def __init__(self, project_root=None):
+        if project_root:
+            self.state_file = Path(project_root) / "logs" / "workflow_state.txt"
+        else:
+            self.state_file = self.find_state_file()
         self.data = {}
         if self.state_file.exists():
             with open(self.state_file, "r") as f:
