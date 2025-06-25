@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-dotenv
+GitPython
+httpx[socks]
+
+[test]
+pytest
+pytest-cov
+pytest-mock
