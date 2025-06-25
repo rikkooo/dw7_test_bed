@@ -76,6 +76,7 @@ def setup_project():
     # Create directory structure
     print("Creating directory structure...")
     Path("docs").mkdir(exist_ok=True)
+    Path("tests").mkdir(exist_ok=True)
     for path in DELIVERABLE_PATHS.values():
         Path(path).mkdir(parents=True, exist_ok=True)
 
@@ -85,9 +86,40 @@ def setup_project():
     # We explicitly initialize the state here, after all checks have passed.
     manager.state.initialize_state()
 
+    # Create README.md
+    print("Creating README.md...")
+    readme_content = """# DW7 Project
+
+This project was initialized using the DW7 workflow.
+
+## Running Tests
+
+To run the test suite, use pytest:
+
+```bash
+pytest
+```
+"""
+    with open("README.md", "w") as f:
+        f.write(readme_content)
+
+    # Create a sample test file
+    print("Creating sample test file...")
+    sample_test_content = """# tests/test_example.py
+
+def test_example():
+    assert 1 + 1 == 2
+"""
+    with open("tests/test_example.py", "w") as f:
+        f.write(sample_test_content)
+
     # Create .gitignore
     print("Creating .gitignore...")
-    gitignore_content = """# Byte-compiled / optimized / DLL files
+    gitignore_content = """# Test reports
+.pytest_cache/
+htmlcov/
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -200,7 +232,7 @@ venv.bak/
 # mkdocs documentation
 /site
 
-# mypy
+# MyPy
 .mypy_cache/
 .dmypy.json
 dmypy.json
@@ -208,8 +240,18 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# pytype static analyzer
-.pytype/
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# DW6 Logs
+logs/technical_debt.log
+logs/meta_requirements.log
 
 # Cython debug symbols
 cython_debug/
