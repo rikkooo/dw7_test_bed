@@ -149,9 +149,24 @@ def main():
     elif args.command == "approve":
         manager.approve(with_tech_debt=args.with_tech_debt)
     elif args.command == "new":
+        # Get the current requirement pointer and increment it
+        current_req_id = int(manager.state.get("RequirementPointer"))
+        new_req_id = current_req_id + 1
+        
+        # Augment the prompt
         augmenter = PromptAugmenter()
         augmented_prompt = augmenter.augment_prompt(args.prompt)
-        process_prompt(augmented_prompt)
+        
+        # Process the prompt to create the new spec file
+        process_prompt(augmented_prompt, new_req_id)
+        
+        # Update the state to the new cycle
+        manager.state.set("RequirementPointer", new_req_id)
+        manager.state.set("CurrentStage", "Engineer")
+        manager.state.save()
+        
+        print(f"--- Started new requirement cycle {new_req_id}. ---")
+        print(f"Current stage is now 'Engineer'.")
 
 if __name__ == "__main__":
     main()
