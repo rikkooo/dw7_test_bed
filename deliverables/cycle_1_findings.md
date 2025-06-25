@@ -32,3 +32,9 @@ This document tracks all flaws, bugs, and improvement points discovered during t
 * **Finding:** The `dw6 new` command generated a specification file named `cycle_6_technical_specification.md` instead of `cycle_1_technical_specification.md`.
 * **Impact:** The cycle tracking mechanism is not initializing correctly, leading to confusing and potentially conflicting deliverable filenames.
 * **Suggestion:** Investigate the state management component of the `dw6` tool to ensure the cycle counter starts at 1 for new projects.
+
+## 6. Prompt Augmentation Failure
+
+* **Finding:** The `dw6 new` command's Prompt Augmentation System failed to populate the `System Context` section of the technical specification, leaving all fields as `Unknown`.
+* **Impact:** A key feature of the workflow is non-functional. The AI does not receive the necessary context (current state, git status, etc.) to generate accurate and context-aware technical specifications.
+* **Suggestion:** Debug the `dw6 new` command and the underlying `PromptAugmenter` to ensure it correctly gathers and injects the system context into the prompt.
