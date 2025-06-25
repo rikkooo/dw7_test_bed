@@ -1,58 +1,51 @@
-# Technical Specification: Automated Coder Deliverable Generation
+# Technical Specification: DW7 Workflow and Tool Repair
 
 **Cycle:** 2
-**Requirement ID:** 3
-**Date:** 2025-06-25
+**Requirement ID:** 2
 
-## 1. Overview
+## 1. High-Level Goal
 
-This cycle aims to automate the creation of the `coder_deliverable.md` file. This will reduce manual work, ensure consistency, and provide a clear, auditable record of all code changes made during the `Coder` stage.
+Fix the core `dw6` CLI tool, project template, and workflow documentation to enable a functional, end-to-end development cycle. This cycle addresses the critical bugs and documentation mismatches discovered during the observational Cycle 1.
 
-## 2. Scope
+## 2. Scope & Sub-Requirements
 
-### In Scope
+This requirement is broken down into the following sub-requirements, derived directly from `deliverables/cycle_1_findings.md`:
 
-*   Create a new function in `git_handler.py` to generate a git diff between the commit saved at the start of the `Coder` stage and the current `HEAD`.
-*   Update `state_manager.py` to automatically generate `deliverables/coding/coder_deliverable.md` when the `Coder` stage is approved.
-*   The deliverable will include a list of modified files and the full git diff.
+* **SR-2.1: Fix Cycle Tracking:** The cycle-tracking mechanism is the root cause of multiple failures. The state manager must be fixed to correctly initialize, increment, and reference the current cycle number for all operations (e.g., `new`, `approve`).
+* **SR-2.2: Implement Missing CLI Commands:** The `dw6 setup` and `dw6 status` commands must be implemented to match the workflow documentation, providing the expected automation and state-checking capabilities.
+* **SR-2.3: Harden Project Template:** The project template must be updated to include a `.gitignore` file and a robust test suite that does not fail when run in a clean environment (i.e., by creating a mock git repo for tests).
+* **SR-2.4: Fix Prompt Augmentation:** The `PromptAugmenter` must be debugged to ensure it correctly populates the `System Context` in new technical specifications.
+* **SR-2.5: Update Workflow Documentation:** The `start-project-dw7.md` workflow file must be updated to reflect the reality of the tool, including guidance on GitHub PATs and removing any commands that are not implemented.
 
-### Out of Scope
+## 3. Implementation Plan
 
-*   Advanced diff analysis or summarization.
-*   Support for non-Git version control systems.
+We will tackle the sub-requirements in order of severity, starting with the cycle-tracking bug that is currently blocking all progress.
 
-## 3. System Architecture
-
-The `state_manager.py` will orchestrate this process. When the `Coder` stage is approved, it will call new functions in `git_handler.py` to get the necessary information from Git and then write the deliverable file.
-
-```mermaid
-graph TD;
-    A[state_manager.py] -->|Approves Coder stage| B(Workflow Logic);
-    B -->|Gets last commit SHA| C(logs/.last_commit_sha);
-    B -->|Calls get_diff| D(git_handler.py);
-    D -->|Generates diff| E(Git);
-    B -->|Writes file| F(deliverables/coding/coder_deliverable.md);
-```
+1. **Code Investigation:** Analyze the `dw6` source code, focusing on `state_manager.py` and `main.py` to locate the source of the cycle-tracking and state-validation bugs.
+2. **Fix Cycle Logic:** Correct the code to properly manage the cycle number.
+3. **Implement `dw6 status`:** Add the `status` command to the CLI to provide visibility into the current state.
+4. **Implement `dw6 setup`:** Add the `setup` command to automate repository initialization.
+5. **Improve Test Suite:** Modify the integration tests to be self-contained.
+6. **Update Template:** Add the `.gitignore` file to the source project template.
+7. **Validate and Document:** Run through a full development cycle to validate all fixes and update the `start-project-dw7.md` documentation.
 
 ## 4. Data Model
 
-No changes to the data model. The process will use the existing `.last_commit_sha` file to determine the starting point for the diff.
+No changes to the data model are anticipated as part of this cycle.
 
 ## 5. Functional Requirements (User Stories)
 
-*   **US-01:** As a developer, I want the system to automatically generate a coder deliverable so that I don't have to create it manually.
-    *   **Acceptance Criteria 1:** When the `Coder` stage is approved, a `coder_deliverable.md` file is created in the `deliverables/coding` directory.
-    *   **Acceptance Criteria 2:** The file contains a list of all files modified during the `Coder` stage.
-    *   **Acceptance Criteria 3:** The file contains the full git diff of all changes.
+* **US-01:** As a developer, I want the `dw6` tool to correctly track the development cycle so that I can rely on its state management.
+  * **Acceptance Criteria 1:** The `dw6` tool correctly initializes and increments the cycle number.
+  * **Acceptance Criteria 2:** The `dw6` tool accurately reflects the current cycle in its state.
+* **US-02:** As a developer, I want the `dw6 setup` command to automate repository initialization so that I can quickly start a new project.
+  * **Acceptance Criteria 1:** The `dw6 setup` command creates a new repository with the correct structure.
+  * **Acceptance Criteria 2:** The `dw6 setup` command initializes the repository with the correct files.
+* **US-03:** As a developer, I want the `dw6 status` command to provide visibility into the current state so that I can understand the project's status.
+  * **Acceptance Criteria 1:** The `dw6 status` command displays the current cycle number.
+  * **Acceptance Criteria 2:** The `dw6 status` command displays the current state of the project.
 
-## 6. Implementation Plan
+## 6. Questions & Assumptions
 
-1.  **Task:** In `git_handler.py`, create a new function `get_diff_from_last_commit()` that reads the SHA from `logs/.last_commit_sha` and returns the git diff from that commit to `HEAD`.
-2.  **Task:** In `state_manager.py`, update the `approve()` method. When the `Coder` stage is being approved, it should call `get_diff_from_last_commit()`.
-3.  **Task:** Create a new function in `state_manager.py` to format the diff and file list into a markdown string and write it to `deliverables/coding/coder_deliverable.md`.
-4.  **Task:** Add a new test in `tests/test_state_manager.py` to verify that the deliverable is created correctly. Use mocks to simulate the git diff and file system operations.
-
-## 7. Questions & Assumptions
-
-*   **Assumption:** The `logs/.last_commit_sha` file will always be present when the `Coder` stage is approved.
-*   **Question:** Should the deliverable be committed automatically? For this cycle, we will focus on just creating the file. The user can then review and commit it as part of the `Deployer` stage.
+* **Assumption:** The `dw6` tool's existing architecture can support the necessary fixes and additions.
+* **Question:** Should the `dw6` tool be modified to support multiple development cycles simultaneously? For this cycle, we will focus on fixing the existing functionality.
