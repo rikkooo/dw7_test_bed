@@ -92,6 +92,7 @@ def setup_project():
     # Initialize workflow state
     print("Initializing workflow state...")
     manager = WorkflowManager()
+    # We explicitly initialize the state here, after all checks have passed.
     manager.state.initialize_state()
 
     # Create .gitignore

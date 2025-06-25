@@ -314,8 +314,6 @@ class WorkflowState:
                 for line in f:
                     key, value = line.strip().split("=", 1)
                     self.data[key] = value
-        else:
-            self.initialize_state()
 
     def initialize_state(self):
         self.data = {
