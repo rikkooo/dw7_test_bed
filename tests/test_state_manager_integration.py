@@ -5,6 +5,7 @@ import os
 import tempfile
 import shutil
 from pathlib import Path
+import git
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
@@ -17,6 +18,13 @@ class TestWorkflowManagerIntegration(unittest.TestCase):
         self.test_dir = tempfile.mkdtemp()
         self.original_cwd = os.getcwd()
         os.chdir(self.test_dir)
+
+        # Initialize a git repository and make an initial commit
+        repo = git.Repo.init(self.test_dir)
+        # Create a dummy file to commit
+        Path("dummy_file.txt").touch()
+        repo.index.add(["dummy_file.txt"])
+        repo.index.commit("Initial commit")
 
         # Create dummy files and directories
         os.makedirs("docs", exist_ok=True)
