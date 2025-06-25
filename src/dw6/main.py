@@ -64,6 +64,8 @@ def register_technical_debt(description, issue_type="test", commit_to_fix=None):
     return new_id
 
 def setup_project():
+    import os
+    print(f"DEBUG: Current working directory is {os.getcwd()}")
     """Initializes a new project directory with the required structure and state."""
     print("--- Initializing New DW6 Project ---")
 
