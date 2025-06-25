@@ -322,6 +322,23 @@ class WorkflowState:
                     key, value = line.strip().split("=", 1)
                     self.data[key] = value
 
+    def find_state_file(self):
+        """
+        Traverses up from the current directory to find the state file.
+        This allows running the CLI from subdirectories.
+        """
+        current_dir = Path.cwd().resolve()
+        while True:
+            potential_path = current_dir / "logs" / "workflow_state.txt"
+            if potential_path.exists():
+                return potential_path
+            if current_dir.parent == current_dir:  # Reached root
+                break
+            current_dir = current_dir.parent
+        
+        # If not found, default to the original CWD. This is for the `setup` command.
+        return Path.cwd() / "logs" / "workflow_state.txt"
+
     def initialize_state(self):
         self.data = {
             "CurrentStage": "Engineer",
