@@ -44,3 +44,9 @@ This document tracks all flaws, bugs, and improvement points discovered during t
 * **Finding:** The `start-project-dw7.md` workflow refers to a `dw6 status` command that doesn't exist.
 * **Impact:** There is no way to check the current state of the project as described in the workflow, causing confusion and breaking the documented process.
 * **Suggestion:** Implement the `dw6 status` command or remove it from the workflow documentation and provide an alternative method for checking the state.
+
+## 8. State Manager Cycle Validation Bug
+
+* **Finding:** The `dw6 approve` command fails during the `Engineer` stage validation because it is hardcoded to look for `deliverables/engineering/cycle_6_technical_specification.md`.
+* **Impact:** This is the same root cause as the "Incorrect Cycle Numbering" bug, but it confirms the issue exists in both the deliverable creation (`new`) and state validation (`approve`) logic. It is impossible to complete a development cycle without manually renaming files back and forth or fixing the tool.
+* **Suggestion:** The `StateManager`'s exit criteria validation must be fixed to use the correct, current cycle number when checking for deliverables.
