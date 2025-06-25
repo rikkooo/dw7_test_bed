@@ -127,6 +127,9 @@ def main():
     do_parser = subparsers.add_parser("do", help="Execute a governed action.")
     do_parser.add_argument("action", type=str, help="The action to execute.")
 
+    # Status command
+    status_parser = subparsers.add_parser("status", help="Display the current workflow status.")
+
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
@@ -146,6 +149,11 @@ def main():
             # The command is authorized. The gatekeeper's job is done.
         except PermissionError:
             sys.exit(1)
+    elif args.command == "status":
+        print("--- DW6 Workflow Status ---")
+        print(f"  Current Stage: {manager.state.get('CurrentStage')}")
+        print(f"  Requirement Cycle: {manager.state.get('RequirementPointer')}")
+        print("---------------------------")
     elif args.command == "approve":
         manager.approve(with_tech_debt=args.with_tech_debt)
     elif args.command == "new":
